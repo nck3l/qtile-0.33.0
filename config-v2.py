@@ -342,7 +342,7 @@ screens = [
 #        widget.Wttr(
 #            update_interval = 3600,
 #            foreground = colors[5],
-#            location = {'38.15408,-121.30134': 'Home'},
+#            location = {: 'Home'},
 #            format = '%C %t',
 #            units = 'u',
 #            fmt = '{}',
