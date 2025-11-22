@@ -7,3 +7,5 @@ Ver. 2 uses the qtile-extras package, which can cause problems when it and the q
 Ver. 3 looks identical, but it uses text boxes and icons to achieve the same pill-shape effect.
 
 :wq ;)
+
+![Screenshot](QTile-Screenshot.png)
