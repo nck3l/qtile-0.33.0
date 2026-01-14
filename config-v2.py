@@ -1,5 +1,5 @@
 # --------------------------------------------------------
-# QTile 0.33.0 Config v.2
+# QTile 0.34.0 Config v.2
 # --------------------------------------------------------
 
 import os, subprocess
@@ -19,10 +19,12 @@ from qtile_extras.widget.decorations import PowerLineDecoration
 
 mod = "mod4"
 myTerm = "alacritty"
+# myBrowser = "firefox"
 myBrowser = "chromium"
 myEditor = "nvim"
-myFiles = "qtfm"
 myCalc = "qalculate-qt"
+launcher = "rofi -show drun"
+#launcher = "dmenu_run -m 0"
 home = str(Path.home())
 
 # A function for hide/show all the windows in a group
@@ -41,6 +43,25 @@ def maximize_by_switching_layout(qtile):
     elif current_layout_name == 'max':
         qtile.current_group.layout = 'monadtall'
 
+#Functions to Increase/Decrease/Reset Gap sizes
+@lazy.layout.function
+def increase_gaps(self):
+    self.margin += 5
+    self.group.layout_all()
+
+@lazy.layout.function
+def decrease_gaps(self):
+    new_margin = self.margin - 5
+    if new_margin < 0:
+        new_margin = 0
+    self.margin = new_margin
+    self.group.layout_all()
+
+@lazy.layout.function
+def reset_gaps(self):
+    self.margin = 0
+    self.group.layout_all()
+
 # --------------------------------------------------------
 # Theming
 # --------------------------------------------------------
@@ -50,8 +71,19 @@ def maximize_by_switching_layout(qtile):
 #colors = scheme ["OceanicNext"]
 #colors = scheme ["Palenight"]
 #colors = scheme ["SolarizedDark"]
-colors = scheme ["TomorrowNight"]
-#colors = scheme ["GruvboxDark"]
+#colors = scheme ["TomorrowNight"]
+colors = scheme ["GruvboxDark"]
+
+## To set color scheme using PyWal ##
+#colors = []
+#cache='/home/nick/.cache/wal/colors'
+# def load_colors(cache):
+#    with open(cache, 'r') as file:
+#        for i in range(8):
+#            colors.append(file.readline().strip())
+#    colors.append('#ffffff')
+#    lazy.reload()
+#load_colors(cache)
 
 # --------------------------------------------------------
 # Key Bindings
@@ -60,35 +92,36 @@ colors = scheme ["TomorrowNight"]
 keys = [
 # Program/Functions launchers
     Key([mod], "Return", lazy.spawn(myTerm), desc="Terminal"),
-    Key([mod], "r", lazy.spawn("dmenu_run -m 0"), desc="dmenu"),
-    Key([mod], "b", lazy.spawn(myBrowser), desc='Web browser'),
-    Key([mod, "shift"], "b", lazy.spawn("qutebrowser"), desc='Web browser'),
+    Key([mod], "r", lazy.spawn(launcher), desc="Program Launcher"),
+    Key([mod], "w", lazy.spawn(myBrowser), desc='Web browser'),
     Key([mod], "c", lazy.spawn(myCalc), desc='Qalculate'),
-    Key([mod], "f", lazy.spawn(myFiles), desc='qtfm'),
     Key([mod, "control"], "v", lazy.spawn("zathura ~/help/VimShortcuts.pdf"), desc='Vim Shortcuts'),
-    Key([mod], "x", lazy.spawn("slock"), desc='Suckless Screen Locker'),
-    Key([], "F2", lazy.spawn("feh --bg-fill -z ~/Pictures/Wallpapers/", shell=True), desc='Change Wallpaper'),
-    Key([mod],	"p", lazy.spawn("bash " + home + "/.local/scripts/dmenu_maim.sh"), desc='Screenshot'),
+    Key([], "F2", lazy.spawn("slock"), desc='Suckless Screen Locker'),
+    Key([], "F7", lazy.spawn("feh --bg-fill -z ~/Pictures/Wallpapers/", shell=True), desc='Change Wallpaper'),
+    Key([], "F3", lazy.spawn("bash " + home + "/.local/scripts/configs.sh"), desc="Config editing script"),
+    Key([], "F4", lazy.spawn("bash " + home + "/.local/scripts/latex-creator.sh"), desc="Latex Document Creator"),
+    Key([], "Print", lazy.spawn(home + "/.local/bin/screenshot"), desc='Screenshot'),
+    Key([], "F6", lazy.spawn(home + "/.local/bin/record"), desc="Luke Smith's screencasting dmenu script"),
+    Key([mod], "F6", lazy.spawn(home + "/.local/bin/record" + "kill"), desc="Stop recording"),
+    Key([], "F8", lazy.spawn(home + "/.local/bin/mounter"), desc="Luke Smith's disk mounter"),
+    Key([mod], "F8", lazy.spawn(home + "/.local/bin/unmounter"), desc="Luke Smith's disk mounter"),
     #Key([mod, "control"], "p", lazy.spawn("ffmpeg -f video4linux2 -s 640x480 -i /dev/video0 -ss 0:0:2 -frames 1 /home/nick/Pictures/Screenshots/out.jpg"), desc='Camera Selfie'),
-
 # Basic Operations
     Key([mod, "shift"], "f", maximize_by_switching_layout(), lazy.window.toggle_fullscreen(), desc='toggle fullscreen'),
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod], "q", lazy.window.kill(), desc="Kill focused window"),
-    #Key([mod], "b", lazy.hide_show_bar(position='all'), desc="Toggles the bar to show/hide"),
+    Key([mod], "b", lazy.hide_show_bar(position='all'), desc="Toggles the bar to show/hide"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "shift"], "Backspace", lazy.shutdown(), desc="Quit Qtile"),
-
 # Volume keys
     Key([], "XF86AudioMute", lazy.spawn("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle")),
     Key([], "XF86AudioMicMute", lazy.spawn("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle")),
     Key([], "XF86AudioLowerVolume", lazy.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-")),
     Key([], "XF86AudioRaiseVolume", lazy.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%+")),
     Key([mod], "XF86AudioLowerVolume", lazy.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 50%")),
-    Key([mod, "control"], "XF86AudioLowerVolume", lazy.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 25%")),
+    Key([mod, "mod1"], "XF86AudioLowerVolume", lazy.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 25%")),
     Key([mod], "XF86AudioRaiseVolume", lazy.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 100%")),
-    Key([mod, "control"], "XF86AudioRaiseVolume", lazy.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 75%")),
-
+    Key([mod, "mod1"], "XF86AudioRaiseVolume", lazy.spawn("wpctl set-volume @DEFAULT_AUDIO_SINK@ 75%")),
 # Changing Focus
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
     Key([mod], "l", lazy.layout.right(), desc="Move focus to right"),
@@ -98,22 +131,23 @@ keys = [
     Key([mod, "shift"], "j", lazy.window.move_to_bottom(), desc="Move Window to bottom of stack"), # Doesn't work with Monad(T/W)
     Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
     Key([mod, "shift"], "m", minimize_all(), desc="Toggle hide/show all windows on current group"),
-
 # Toggle split. Split = all windows displayed
     Key([mod, "shift"], "space", lazy.layout.toggle_split(), desc="Toggle between split and unsplit sides of stack"),
-
 # Grow/shrink windows left/right for MonadTall, MonadWide, bsp, and Columns layouts.
-    Key([mod], "equal",
+    Key([mod, "mod1"], "equal",
         lazy.layout.grow_left().when(layout=["bsp", "columns"]),
         lazy.layout.grow().when(layout=["monadtall", "monadwide"]),
         desc="Grow window to the left"
     ),
-    Key([mod], "minus",
+    Key([mod, "mod1"], "minus",
         lazy.layout.grow_right().when(layout=["bsp", "columns"]),
         lazy.layout.shrink().when(layout=["monadtall", "monadwide"]),
         desc="Grow window to the right"
     ),
-
+# Increase/Decrease/Reset Gaps
+    Key([mod], "g", increase_gaps(), desc="Increase Gaps"),
+    Key([mod, "shift"], "g", decrease_gaps(), desc="Decrease Gaps"),
+    Key([mod, "mod1"], "g", reset_gaps(), desc="Reset Gaps"),
 # Grow windows up, down, left, right for bsp and Columns.
     Key([mod, "control"], "h", lazy.layout.grow_left(), desc="Grow window to the left"),
     Key([mod, "control"], "l", lazy.layout.grow_right(), desc="Grow window to the right"),
@@ -122,6 +156,7 @@ keys = [
     Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
     Key([mod], "m", lazy.layout.maximize(), desc='Toggle between min and max sizes'),
     Key([mod], "t", lazy.window.toggle_floating(), desc='toggle floating'),
+    Key([mod, "shift"], "m", minimize_all(), desc="Toggle hide/show all windows on current group"),
 ]
 
 # --------------------------------------------------------
@@ -134,9 +169,9 @@ groups = [
               #label = "󰽧",
               layout = "monadtall",),
         Group("2",
-              label = "",
+              label = "",
               #label = "󰽡",
-              layout = "max", matches = [Match(wm_class="chromium"), Match(wm_class="qutebrowser")]),
+              layout = "max", matches = [Match(wm_class="librewolf"), Match(wm_class="chromium"), Match(wm_class="firefox")]),
         Group("3",
               label = "",
               #label = "󰽨",
@@ -146,10 +181,10 @@ groups = [
               #label = "󰽢",
               layout = "monadtall", matches = [Match(wm_class="Gimp")]),
         Group("5",
-              label = "",
-              #label = "",
+              label = "",
+              #label = "",
               #label = "󰽦",
-              layout = "monadtall", matches = [Match(wm_class="mpv")]),
+              layout = "monadtall"),
 #        Group("6",
 #              label = "󱃎",
 #              #label = "󰽣",
@@ -189,7 +224,7 @@ for i in groups:
 groups.append(ScratchPad("9", [
     DropDown("terminal", myTerm, x=0.2, y=0.1, width=0.60, height=0.60, on_focus_lost_hide=False ),
     DropDown("music", myTerm + " -e ncmpcpp", x=0.2, y=0.1, width=0.60, height=0.60, on_focus_lost_hide=False ),
-    DropDown("lf", myTerm + "-e lf", x=0.2, y=0.1, width=0.60, height=0.60, on_focus_lost_hide=False ),
+    DropDown("lf", myTerm + " -e lf", x=0.2, y=0.1, width=0.60, height=0.60, on_focus_lost_hide=False ),
 ]))
 
 keys.extend([
@@ -232,8 +267,8 @@ decor_left = {
     "decorations": [
         PowerLineDecoration(
             # path="arrow_left"
-            path="rounded_left"
-            # path="forward_slash"
+            # path="rounded_left"
+            path="forward_slash"
             # path="back_slash"
         )
     ],
@@ -243,9 +278,9 @@ decor_right = {
     "decorations": [
         PowerLineDecoration(
             # path="arrow_right"
-            path="rounded_right"
+            # path="rounded_right"
             # path="forward_slash"
-            # path="back_slash"
+            path="back_slash"
         )
     ],
 }
@@ -254,8 +289,8 @@ decor_right = {
 # --------------------------------------------------------
 
 widget_defaults = dict(
-    font="Hack Mono",
-    fontsize = 12,
+    font="HackNerdFontPropo",
+    fontsize = 14,
     padding = 4,
     )
 
@@ -275,24 +310,22 @@ screens = [
            ),
 	    widget.GroupBox(
             **decor_left,
-            font = "SauceCodePro Nerd Font Mono",
-            fontsize = 17,
-            background = colors[0],
+            background = colors[2],
             margin_y = 4,
-            margin_x = 6,
+#            margin_x = 6,
             padding_y = 0,
-            padding_x = 5,
-            borderwidth = 2,
-            active = colors[5],
+            padding_x = 1,
+            borderwidth = 3,
+            active = '#478061',
             inactive = colors[9],
             rounded = False,
-            block_highlight_text_color = "ffffff",
-            highlight_color = colors[2],
+#            this_screen_border = colors[1],
+            this_current_screen_border = '#3E363F',
             highlight_method = 'block',
-            hide_unused = True,
+            hide_unused = False,
             ),
 #        widget.CurrentLayout(
-#            background = colors[0],
+#            background = colors[2],
 #            foreground = colors[1],
 #            ),
 # Middle Widget area
@@ -302,64 +335,64 @@ screens = [
             ),
         widget.WindowName(
             **decor_left,
-            background = colors[0],
+            background = colors[2],
             foreground = colors[6],
             max_chars = 100,
             ),
+# Right Widget area
 	    widget.Spacer(
             **decor_right,
             length=50
             ),
-# Right Widget area
         widget.CheckUpdates(
-            background = colors[10],
-            colour_have_updates = "478061",
-            colour_no_updates = colors[9],
+            background = colors[2],
+            colour_have_updates = "#478061",
+            colour_no_updates = colors[2],
             update_interval = 3600,
             distro = 'Void',
             display_format = '  {updates}',
             no_update_string = ' ',
             ),
         widget.CPU(
-            background = colors[3],
-            foreground = colors[0],
+            background = colors[2],
+            foreground = colors[7],
             format = ' {load_percent}%',
             ),
         widget.Memory(
-            background = colors[5],
-            foreground = colors[0],
-            format = '{MemUsed: .0f}{mm}',
+            background = colors[2],
+            foreground = colors[5],
+            format = '{MemUsed:.0f}{mm}',
             fmt = ' {}',
             ),
+#        widget.Wlan(
+#            background = colors[2],
+#            foreground = colors[4],
+#            interface = 'wlp2s0',
+#            format = '{percent:2.0%}',
+#            fmt = '{}',
+#            ethernet_interface = 'enp0s25',
+#            ethernet_message_format = ' ',
+#            disconnected_message = ' ',
+#            ),
         widget.GenPollText(
-            background = colors[4],
-            foreground = colors[0], #6
-            name = 'VPN',
-            update_interval = 3600,
-            fmt = '{} ',
+            background = colors[2],
+            foreground = colors[8],
+            name = 'NETWORK',
+            update_interval = 10,
+            fmt = '{}',
             func = lambda: subprocess.check_output(home + '/.local/scripts/network.sh').decode('utf-8').strip(),
             ),
-        widget.Wlan(
-            background = colors[4],
-            foreground = colors[0], #6
-            interface = 'wlp2s0',
-            format = '{percent:2.0%}',
-            fmt = '{}',
-            ethernet_interface = 'enp0s25',
-            ethernet_message_format = ' ',
-            disconnected_message = ' ',
-            ),
         widget.GenPollText(
-            background = colors[8],
-            foreground = colors[0], #1
+            background = colors[2],
+            foreground = colors[6],
             name = 'Volume',
-            update_interval = 3,
-            fmt = '{}',
+            update_interval = 2,
+            fmt = '{}%',
             func = lambda: subprocess.check_output(home + '/.local/scripts/vol.sh').decode('utf-8').strip(),
             ),
         widget.Battery(
-            background = colors[6],
-            foreground = colors[0], #8
+            background = colors[2],
+            foreground = colors[5],
             battery = 0,
             charge_char = '󰂄',
             full_char = '󰚥',
@@ -373,12 +406,12 @@ screens = [
             ),
 #        widget.Bluetooth(
 #            background = colors[0],
-#            foreground = '1c39bb',
+#            foreground = '#1c39bb',
 #            adapter_format = ' : {name} [{powered}{discovery}]'),
         widget.Clock(
             **decor_left,
-            background = colors[7],
-            foreground = colors[0], #7
+            background = colors[2],
+            foreground = colors[3],
             format = "%e %b %H:%M", # %a, %e %b
             ),
         widget.Spacer(
@@ -386,9 +419,9 @@ screens = [
             length=10
             ),
         ], # closes widget Definitions
-        21,
+        20,
         background = '#00000000', # makes the bar black with complete transparency
-        # margin = [3, 10, 5, 10] # makes bar float with padding [N, E, S, W]
+         margin = [3, 0, 3, 0] # makes bar float with padding [N, E, S, W]
         ), # closes bar.bar
 	) # closes Screen
 ] # closes screens
@@ -401,6 +434,9 @@ mouse = [
     Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
     Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
     Click([mod], "Button2", lazy.window.bring_to_front()),
+    # Drag(["mod1"], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
+    # Drag(["mod1"], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
+    # Click(["mod1"], "Button2", lazy.window.bring_to_front()),
 ]
 
 # --------------------------------------------------------
@@ -446,10 +482,10 @@ auto_minimize = True
 # When using the Wayland backend, this can be used to configure input devices.
 wl_input_rules = None
 
-#@hook.subscribe.startup_once
-#def start_once():
-#    home = os.path.expanduser('~')
-#    subprocess.call([home + '/.config/qtile/autostart.sh'])
+@hook.subscribe.startup_once
+def start_once():
+    home = os.path.expanduser('~')
+    subprocess.call([home + '/.config/qtile/autostart.sh'])
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
