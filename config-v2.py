@@ -2,11 +2,10 @@
 # QTile 0.34.0 Config v.2
 # --------------------------------------------------------
 
-import os, subprocess
+import os, subprocess, colors
 from libqtile import bar, extension, hook, layout, qtile
 from libqtile.config import Click, Drag, Group, Key, Match, Screen, ScratchPad, KeyChord, DropDown
 from libqtile.lazy import lazy
-from colors import *
 from typing import List
 from pathlib import Path
 from qtile_extras import widget
@@ -19,6 +18,7 @@ from qtile_extras.widget.decorations import PowerLineDecoration
 
 mod = "mod4"
 myTerm = "alacritty"
+#myTerm = "st"
 # myBrowser = "firefox"
 myBrowser = "chromium"
 myEditor = "nvim"
@@ -66,24 +66,16 @@ def reset_gaps(self):
 # Theming
 # --------------------------------------------------------
 
-#colors = scheme ["Nord"]
-#colors = scheme ["MonokaiPro"]
-#colors = scheme ["OceanicNext"]
-#colors = scheme ["Palenight"]
-#colors = scheme ["SolarizedDark"]
-#colors = scheme ["TomorrowNight"]
-colors = scheme ["GruvboxDark"]
-
-## To set color scheme using PyWal ##
-#colors = []
-#cache='/home/nick/.cache/wal/colors'
-# def load_colors(cache):
-#    with open(cache, 'r') as file:
-#        for i in range(8):
-#            colors.append(file.readline().strip())
-#    colors.append('#ffffff')
-#    lazy.reload()
-#load_colors(cache)
+#colors = colors.Nord
+colors = colors.MonokaiPro
+#colors = colors.OceanicNext
+#colors = colors.Palenight
+#colors = colors.SolarizedDark
+#colors = colors.TomorrowNight
+#colors = colors.GruvboxDark
+#colors = colors.DoomOne
+#colors = colors.Dracula
+#colors = colors.SolarizedLight
 
 # --------------------------------------------------------
 # Key Bindings
@@ -96,15 +88,15 @@ keys = [
     Key([mod], "w", lazy.spawn(myBrowser), desc='Web browser'),
     Key([mod], "c", lazy.spawn(myCalc), desc='Qalculate'),
     Key([mod, "control"], "v", lazy.spawn("zathura ~/help/VimShortcuts.pdf"), desc='Vim Shortcuts'),
-    Key([], "F2", lazy.spawn("slock"), desc='Suckless Screen Locker'),
+    Key([], "F2", lazy.spawn("physlock -p 'What are you doing here?'"), desc='physlock Screen Locker'),
     Key([], "F7", lazy.spawn("feh --bg-fill -z ~/Pictures/Wallpapers/", shell=True), desc='Change Wallpaper'),
     Key([], "F3", lazy.spawn("bash " + home + "/.local/scripts/configs.sh"), desc="Config editing script"),
     Key([], "F4", lazy.spawn("bash " + home + "/.local/scripts/latex-creator.sh"), desc="Latex Document Creator"),
     Key([], "Print", lazy.spawn(home + "/.local/bin/screenshot"), desc='Screenshot'),
     Key([], "F6", lazy.spawn(home + "/.local/bin/record"), desc="Luke Smith's screencasting dmenu script"),
     Key([mod], "F6", lazy.spawn(home + "/.local/bin/record" + "kill"), desc="Stop recording"),
-    Key([], "F8", lazy.spawn(home + "/.local/bin/mounter"), desc="Luke Smith's disk mounter"),
-    Key([mod], "F8", lazy.spawn(home + "/.local/bin/unmounter"), desc="Luke Smith's disk mounter"),
+#    Key([], "F8", lazy.spawn(home + "/.local/bin/mounter"), desc="Luke Smith's disk mounter"),
+#    Key([mod], "F8", lazy.spawn(home + "/.local/bin/unmounter"), desc="Luke Smith's disk mounter"),
     #Key([mod, "control"], "p", lazy.spawn("ffmpeg -f video4linux2 -s 640x480 -i /dev/video0 -ss 0:0:2 -frames 1 /home/nick/Pictures/Screenshots/out.jpg"), desc='Camera Selfie'),
 # Basic Operations
     Key([mod, "shift"], "f", maximize_by_switching_layout(), lazy.window.toggle_fullscreen(), desc='toggle fullscreen'),
@@ -131,17 +123,19 @@ keys = [
     Key([mod, "shift"], "j", lazy.window.move_to_bottom(), desc="Move Window to bottom of stack"), # Doesn't work with Monad(T/W)
     Key([mod], "space", lazy.layout.next(), desc="Move window focus to other window"),
     Key([mod, "shift"], "m", minimize_all(), desc="Toggle hide/show all windows on current group"),
+    Key([mod, "mod1"], "space", lazy.layout.shuffle_up(), desc="Move window up the stack"),
+    Key([mod, "control"], "space", lazy.layout.shuffle_down(), desc="Move window down the stack"),
 # Toggle split. Split = all windows displayed
     Key([mod, "shift"], "space", lazy.layout.toggle_split(), desc="Toggle between split and unsplit sides of stack"),
 # Grow/shrink windows left/right for MonadTall, MonadWide, bsp, and Columns layouts.
     Key([mod, "mod1"], "equal",
         lazy.layout.grow_left().when(layout=["bsp", "columns"]),
-        lazy.layout.grow().when(layout=["monadtall", "monadwide"]),
+        lazy.layout.grow().when(layout=["monadtall", "monadwide", "tile"]),
         desc="Grow window to the left"
     ),
     Key([mod, "mod1"], "minus",
         lazy.layout.grow_right().when(layout=["bsp", "columns"]),
-        lazy.layout.shrink().when(layout=["monadtall", "monadwide"]),
+        lazy.layout.shrink().when(layout=["monadtall", "monadwide", "tile"]),
         desc="Grow window to the right"
     ),
 # Increase/Decrease/Reset Gaps
@@ -165,38 +159,39 @@ keys = [
 
 groups = [
         Group("1",
-              label = "",
+              label = "",
               #label = "󰽧",
-              layout = "monadtall",),
+              layout = "tile",),
         Group("2",
-              label = "",
+              label = "",
+              #label = "",
               #label = "󰽡",
               layout = "max", matches = [Match(wm_class="librewolf"), Match(wm_class="chromium"), Match(wm_class="firefox")]),
         Group("3",
-              label = "",
+              label = "",
               #label = "󰽨",
-              layout = "monadtall", matches = [Match(wm_class="Zathura")]),
+              layout = "tile", matches = [Match(wm_class="Zathura")]),
         Group("4",
               label = "",
               #label = "󰽢",
-              layout = "monadtall", matches = [Match(wm_class="Gimp")]),
+              layout = "floating", matches = [Match(wm_class="Gimp")]),
         Group("5",
-              label = "",
+              label = "󰣙",
               #label = "",
               #label = "󰽦",
-              layout = "monadtall"),
+              layout = "tile"),
 #        Group("6",
 #              label = "󱃎",
 #              #label = "󰽣",
-#              layout = "monadtall"),
+#              layout = "tile"),
 #        Group("7",
 #              label = "󰍘",
 #              #label = "󰽥",
-#              layout = "monadtall"),
+#              layout = "tile"),
 #        Group("8",
-#              label = "󰣙",
+#              label = "",
 #              #label = "󰽤",
-#              layout = "monadtall"),
+#              layout = "tile"),
 ]
 
 for i in groups:
@@ -244,12 +239,12 @@ layout_theme = {"border_width": 2,
                 }
 
 layouts = [
-    layout.MonadTall(**layout_theme, ratio = 0.55, new_client_position='top'),
+    layout.Tile(**layout_theme, ratio=0.55),
     layout.Max(**layout_theme),
-    #layout.Tile(**layout_theme, ratio=0.55),
+    layout.Floating(**layout_theme)
+    #layout.MonadTall(**layout_theme, ratio = 0.55, new_client_position='top'),
     #layout.MonadWide(**layout_theme),
     #layout.Bsp(**layout_theme),
-    #layout.Floating(**layout_theme)
     #layout.RatioTile(**layout_theme),
     #layout.VerticalTile(**layout_theme),
     #layout.Matrix(**layout_theme),
@@ -289,7 +284,7 @@ decor_right = {
 # --------------------------------------------------------
 
 widget_defaults = dict(
-    font="HackNerdFontPropo",
+    font="Hack Nerd Font Propo",
     fontsize = 14,
     padding = 4,
     )
@@ -305,7 +300,6 @@ screens = [
 # Left Widget area
 	    widget.Spacer(
            **decor_right,
-           #background = colors[0],
            length=10
            ),
 	    widget.GroupBox(
@@ -320,14 +314,11 @@ screens = [
             inactive = colors[9],
             rounded = False,
 #            this_screen_border = colors[1],
-            this_current_screen_border = '#3E363F',
+#            this_current_screen_border = '#3E363F',
+            this_current_screen_border = '#000000',
             highlight_method = 'block',
             hide_unused = False,
             ),
-#        widget.CurrentLayout(
-#            background = colors[2],
-#            foreground = colors[1],
-#            ),
 # Middle Widget area
 	    widget.Spacer(
             **decor_right,
@@ -337,7 +328,7 @@ screens = [
             **decor_left,
             background = colors[2],
             foreground = colors[6],
-            max_chars = 100,
+            max_chars = 60,
             ),
 # Right Widget area
 	    widget.Spacer(
@@ -347,33 +338,31 @@ screens = [
         widget.CheckUpdates(
             background = colors[2],
             colour_have_updates = "#478061",
-            colour_no_updates = colors[2],
+            colour_no_updates = colors[9],
             update_interval = 3600,
             distro = 'Void',
-            display_format = '  {updates}',
-            no_update_string = ' ',
+            display_format = ' {updates}',
+            no_update_string = '󰜺',
             ),
+#        widget.Wttr(
+#            update_interval = 3600,
+#            foreground = colors[5],
+#            location = {: 'Home'},
+#            format = '%C %t',
+#            units = 'u',
+#            fmt = '{}',
+#            ),
         widget.CPU(
             background = colors[2],
             foreground = colors[7],
-            format = ' {load_percent}%',
+            format = ' {load_percent:.0f}%',
             ),
         widget.Memory(
             background = colors[2],
             foreground = colors[5],
             format = '{MemUsed:.0f}{mm}',
-            fmt = ' {}',
+            fmt = ' {}',
             ),
-#        widget.Wlan(
-#            background = colors[2],
-#            foreground = colors[4],
-#            interface = 'wlp2s0',
-#            format = '{percent:2.0%}',
-#            fmt = '{}',
-#            ethernet_interface = 'enp0s25',
-#            ethernet_message_format = ' ',
-#            disconnected_message = ' ',
-#            ),
         widget.GenPollText(
             background = colors[2],
             foreground = colors[8],
@@ -387,7 +376,7 @@ screens = [
             foreground = colors[6],
             name = 'Volume',
             update_interval = 2,
-            fmt = '{}%',
+            fmt = '{}',
             func = lambda: subprocess.check_output(home + '/.local/scripts/vol.sh').decode('utf-8').strip(),
             ),
         widget.Battery(
@@ -401,13 +390,19 @@ screens = [
             empty_char = '󱊡',
             empty_short_text = '󱊡',
             low_percentage = 0.1,
+            notify_below = 0.2,
             format = '{char} {percent:2.0%} {hour:d}:{min:02d}',
             fmt = '{}',
             ),
-#        widget.Bluetooth(
-#            background = colors[0],
-#            foreground = '#1c39bb',
-#            adapter_format = ' : {name} [{powered}{discovery}]'),
+ #       widget.Bluetooth(
+ #           background = colors[2],
+ #           foreground = '#1c39bb',
+ #           default_show_battery = true,
+ #           symbol_connected = '󰂱',
+ #           symbol_paired = '',
+ #           symbol_discovery = ('󰂳',''),
+ #           symbol_powered = ('󰥉','󰤾'),
+ #           adapter_format = '{symbol}{name} [{powered}{discovery}]'),
         widget.Clock(
             **decor_left,
             background = colors[2],
@@ -415,7 +410,6 @@ screens = [
             format = "%e %b %H:%M", # %a, %e %b
             ),
         widget.Spacer(
-            #background = colors[0],
             length=10
             ),
         ], # closes widget Definitions
@@ -487,12 +481,10 @@ def start_once():
     home = os.path.expanduser('~')
     subprocess.call([home + '/.config/qtile/autostart.sh'])
 
-# XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
-# string besides java UI toolkits; you can see several discussions on the
+# Only java UI toolkits are concerned with this seting; see several discussions on the
 # mailing lists, GitHub issues, and other WM documentation that suggest setting
-# this string if your java app doesn't work correctly. We may as well just lie
-# and say that we're a working one by default.
-#
+# this string if your java app doesn't work correctly.
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
 # java that happens to be on java's whitelist.
-wmname = "qtile"
+#wmname = "LG3D"
+wmname = "QTile"
